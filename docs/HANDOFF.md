@@ -23,6 +23,24 @@ makes, with the reason and the evidence), `docs/WOW64.md`, `docs/BUILDING.md`.
 
 ## 0. Latest status (keep this section current; newest first)
 
+* **2026-09-30 (Claude, evening):** Owner requested to change iOS deployment 
+  target from 26.0 to 18.0 to support older devices. Changed 
+  `IPHONEOS_DEPLOYMENT_TARGET` in `app/Madeira.xcodeproj/project.pbxproj`:
+  - Main project (Madeira): 26.0 → 18.0 (Debug and Release configurations)
+  - Extension (MadeiraMemoryHost): 17.0 → 18.0 (Debug and Release configurations)
+  Verified with `xcodebuild -showBuildSettings`: all 4 instances now set to 18.0.
+  **Reason:** Support deployment on devices running iOS 18.x instead of requiring 
+  iOS 26.0 (which doesn't exist yet; likely was meant for iOS 18 originally).
+  **Evidence:** grep output shows all 4 `IPHONEOS_DEPLOYMENT_TARGET` lines = 18.0;
+  `xcodebuild -showBuildSettings` reports `IPHONEOS_DEPLOYMENT_TARGET = 18.0`.
+  The iOS 26 APIs the app uses (BGContinuedProcessingTask, `.glassEffect`,
+  search-bar toolbar integration) are all behind `#available(iOS 26.0, *)`
+  guards (ContentView.swift, Library.swift, SteamDownloadBackground.swift), so
+  the lower target compiles; MetalFX.framework is iOS 16+.
+  **Open:** the native ABI changes with this commit (`project.pbxproj` is one of
+  the hashed blobs: new ABI 7e4937a1662cb8b2), so packs built before it will
+  refuse to install over the new IPA -- that is the intended behaviour and needs
+  no `EPOCH` bump (EPOCH is only for workflow changes, which this is not).
 * **2026-09-30 (Claude):** builds 244-252+ -- see "Builds 228-234" section for
   the full trail. In short:
   - 32-bit **Crysis** runs (D3D10 via DXMT, ~110 FPS unrecorded on build 249).
