@@ -23,6 +23,31 @@ makes, with the reason and the evidence), `docs/WOW64.md`, `docs/BUILDING.md`.
 
 ## 0. Latest status (keep this section current; newest first)
 
+* **2026-09-30 (late evening, assistant of hsnkshhsjss-code — a third-party
+  user of this public repo, not the owner):** hsnkshhsjss-code cloned the repo
+  and asked for a rebuild for their iPhone on **iOS 18.7.8**. They have no
+  push access here, so the work moved to their fork
+  **hsnkshhsjss-code/madeira-bcd**:
+  - Rebased the deployment-target commit (26.0/17.0 -> 18.0, previous entry)
+    from the stale local `tmp-deploy-target-18` onto the current dev head
+    (85516d7) as dd1a5a3 and pushed it to the fork (branch of the same name).
+  - `build-ipa.yml` edit on that branch: the "Fetch Metal Shader Converter"
+    step no longer `exit 1`s on a missing `msc-private` release — the fork
+    has no such draft release and cannot create one legitimately (Apple
+    sign-in), and it does not need the package: `build/madeira-d3d12/deps.sh`
+    already resolves the hash-checked vendored headers
+    (`research/madeira-d3d12/third_party/metal-shader-converter`, verified
+    locally against SHA256SUMS) and the pinned iOS library
+    (`app/Madeira/d3d12/libmetalirconverter.dylib`), and
+    `build/dxmt-ios/build.sh` builds the real conversion service from them.
+    Upstream keeps the hard failure deliberately; if the owner ever wants the
+    same relaxation here, the pkg stays the primary source.
+  - Dispatched `build-ipa.yml` on the fork, ref `tmp-deploy-target-18`
+    (unsigned-IPA artifact only; no OTA secrets there, so the owner's OTA
+    pipeline is untouched). Result and run id to be appended after the run.
+  - **Open:** on-device test on iOS 18.7.8 by hsnkshhsjss-code (they sign the
+    unsigned IPA themselves; JIT via StikDebug per README).
+
 * **2026-09-30 (Claude, evening):** Owner requested to change iOS deployment 
   target from 26.0 to 18.0 to support older devices. Changed 
   `IPHONEOS_DEPLOYMENT_TARGET` in `app/Madeira.xcodeproj/project.pbxproj`:

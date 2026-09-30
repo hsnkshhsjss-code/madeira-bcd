@@ -819,10 +819,16 @@ jobs:
                           print(a['url'], a['name']); sys.exit(0)
           ")
           if [ -z "$ASSET" ]; then
-            # madeira-bcd: a stub build draws nothing in any D3D12 game (build 180
-            # after the release was deleted); fail instead of shipping one.
-            echo "::error::no msc-private release with a .dmg/.pkg asset -- a D3D12 stub build draws nothing; re-create the DRAFT release"
-            exit 1
+            # Upstream fails here: a stub build draws nothing in any D3D12 game
+            # (build 180 after the release was deleted). This fork builds the
+            # real conversion service anyway: build/madeira-d3d12/deps.sh
+            # resolves the hash-checked vendored headers
+            # (research/madeira-d3d12/third_party/metal-shader-converter) and
+            # the pinned iOS library (app/Madeira/d3d12/libmetalirconverter.dylib)
+            # without the installer package, so skip the fetch and let deps.sh
+            # decide.
+            echo "::warning::no msc-private release with a .dmg/.pkg asset -- continuing on the vendored converter headers and pinned iOS library (build/madeira-d3d12/deps.sh)"
+            exit 0
           fi
           URL=${ASSET%% *}; NAME=${ASSET#* }
           mkdir -p /tmp/msc && cd /tmp/msc
