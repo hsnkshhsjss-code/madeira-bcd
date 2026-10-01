@@ -23,6 +23,25 @@ makes, with the reason and the evidence), `docs/WOW64.md`, `docs/BUILDING.md`.
 
 ## 0. Latest status (keep this section current; newest first)
 
+* **2026-10-01 (assistant of hsnkshhsjss-code, continuing the fork build):**
+  Fork run 36773497309 FAILED at "Archive (unsigned)" after ~70 min (the
+  cold-cache native chains — wine, FEX, the two-stage LLVM 15 iOS build — all
+  built fine; build-logs artifact has archive.log). Cause: HomeView.swift used
+  iOS 26 Glass APIs UNGUARDED — `GlassEffectContainer` (521), `glassEffect`
+  (612, 832, 855, 920), `.glassProminent` (664). With
+  IPHONEOS_DEPLOYMENT_TARGET=18.0 the compiler now requires runtime
+  availability guards, so `error: '...' is only available in iOS 26.0 or
+  newer` (archive.log lines 882-942). The 2026-09-30 evening entry's claim
+  that all iOS 26 API uses are guarded covered ContentView/Library/
+  SteamDownloadBackground but missed HomeView. **Fix:** a `glassCompat`
+  modifier in HomeView.swift (real glass on iOS 26+, an ultraThinMaterial
+  shape fill before that — the ContentView.glassFace fallback as a modifier)
+  replaces all four `glassEffect` sites; `statusRow` extracts `statusChips`
+  and wraps `GlassEffectContainer` in `if #available(iOS 26.0, *)`;
+  `.glassProminent` gets a `.borderedProminent` fallback branch. Nothing
+  changes on iOS 26+. `swiftc -parse` clean. Re-dispatched the workflow on
+  the fork (run id appended after the run).
+
 * **2026-09-30 (late evening, assistant of hsnkshhsjss-code — a third-party
   user of this public repo, not the owner):** hsnkshhsjss-code cloned the repo
   and asked for a rebuild for their iPhone on **iOS 18.7.8**. They have no

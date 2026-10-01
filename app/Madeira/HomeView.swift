@@ -518,7 +518,17 @@ struct HomeView: View {
     // MARK: Sections
 
     private var statusRow: some View {
-        GlassEffectContainer(spacing: 8) {
+        Group {
+            if #available(iOS 26.0, *) {
+                GlassEffectContainer(spacing: 8) { statusChips }
+            } else {
+                statusChips
+            }
+        }
+        .padding(.top, 4)
+    }
+
+    private var statusChips: some View {
         HStack(spacing: 8) {
             StatusChip(icon: "bolt.fill", text: jitOn ? "JIT on" : "JIT off", tint: jitOn ? .green : .orange)
             if controllers.connectedControllersCount > 0 {
@@ -531,8 +541,6 @@ struct HomeView: View {
             }
             Spacer()
         }
-        }
-        .padding(.top, 4)
     }
 
     private var jitBanner: some View {
@@ -609,7 +617,7 @@ struct HomeView: View {
                     .font(.title3)
                     .foregroundStyle(.white)
                     .frame(width: 40, height: 40)
-                    .glassEffect(.regular.interactive(), in: Circle())
+                    .glassCompat(Circle(), interactive: true)
             }
         }
         .padding(14)
@@ -658,10 +666,17 @@ struct HomeView: View {
                 Text("Copy a game's folder into C:\\ — in the Files app that is On My iPhone › Madeira › wine › drive_c. "
                      + "A folder under Program Files works too. Then pull the list to rescan.")
                     .font(.callout).foregroundStyle(.secondary)
-                Button { FilesApp.openDriveC() } label: {
-                    Label("Open C:\\ in Files", systemImage: "folder")
+                if #available(iOS 26.0, *) {
+                    Button { FilesApp.openDriveC() } label: {
+                        Label("Open C:\\ in Files", systemImage: "folder")
+                    }
+                    .buttonStyle(.glassProminent)
+                } else {
+                    Button { FilesApp.openDriveC() } label: {
+                        Label("Open C:\\ in Files", systemImage: "folder")
+                    }
+                    .buttonStyle(.borderedProminent)
                 }
-                .buttonStyle(.glassProminent)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -829,7 +844,7 @@ private struct StatusChip: View {
         .foregroundStyle(tint)
         .padding(.horizontal, 10)
         .padding(.vertical, 5)
-        .glassEffect(.regular.tint(tint.opacity(0.25)), in: Capsule())
+        .glassCompat(Capsule(), tint: tint.opacity(0.25))
     }
 }
 
@@ -852,7 +867,7 @@ private struct PlayGlyph: View {
             .font(.system(size: 16, weight: .bold))
             .foregroundStyle(.white)
             .frame(width: 40, height: 40)
-            .glassEffect(.regular.interactive(), in: Circle())
+            .glassCompat(Circle(), interactive: true)
     }
 }
 
@@ -917,7 +932,7 @@ private struct GameCard: View {
                         .foregroundStyle(.white)
                         .padding(.horizontal, 7)
                         .padding(.vertical, 3)
-                        .glassEffect(.regular, in: Capsule())
+                        .glassCompat(Capsule())
                         .padding(8)
                 }
             }
@@ -1372,5 +1387,32 @@ struct AppSettingsSheet: View {
             .sheet(isPresented: $showControllers) { ControllerSetupSheet() }
         }
         .preferredColorScheme(.dark)
+    }
+}
+
+/// `.glassEffect` on iOS 26 and newer; before that, a translucent material in
+/// the same shape (the ContentView.glassFace fallback, as a modifier).
+extension View {
+    @ViewBuilder
+    func glassCompat(_ shape: some Shape, tint: Color? = nil,
+                     interactive: Bool = false) -> some View {
+        if #available(iOS 26.0, *) {
+            self.glassEffect(HomeGlass.regular(tint: tint, interactive: interactive), in: shape)
+        } else {
+            self.background {
+                shape.fill(.ultraThinMaterial)
+                if let tint { shape.fill(tint.opacity(0.35)) }
+            }
+        }
+    }
+}
+
+@available(iOS 26.0, *)
+private enum HomeGlass {
+    static func regular(tint: Color?, interactive: Bool) -> Glass {
+        var glass = Glass.regular
+        if interactive { glass = glass.interactive() }
+        if let tint { glass = glass.tint(tint) }
+        return glass
     }
 }
