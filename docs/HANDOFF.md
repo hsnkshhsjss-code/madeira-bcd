@@ -40,7 +40,17 @@ makes, with the reason and the evidence), `docs/WOW64.md`, `docs/BUILDING.md`.
   and wraps `GlassEffectContainer` in `if #available(iOS 26.0, *)`;
   `.glassProminent` gets a `.borderedProminent` fallback branch. Nothing
   changes on iOS 26+. `swiftc -parse` clean. Re-dispatched the workflow on
-  the fork (run id appended after the run).
+  the fork: **run 36902650493 GREEN in 13 min** (the first run's caches —
+  wine tools, GnuTLS/FFmpeg, FEX iOS/ARM64EC/WOW64, LLVM 15 iOS, llvm-mingw,
+  i386 farm — restored on the branch, so the native chains did not rebuild).
+  Log checks: msc-private warning -> continued on vendored headers;
+  "madeira-d3d12 canary (Objective-C++, Metal Shader Converter)" ran (real
+  conversion service, not the stub); vcruntime "recovered 12 of 12".
+  Artifact **madeira-0.1.2-unsigned-ipa** (147.9 MB, expires 2026-12-30),
+  https://github.com/hsnkshhsjss-code/madeira-bcd/actions/runs/36902650493.
+  **Open:** hsnkshhsjss-code downloads the artifact (GitHub sign-in), signs
+  it with their Apple ID (Feather/Sideloadly/ESign), installs on the iPhone
+  (iOS 18.7.8) and runs games through StikDebug for JIT.
 
 * **2026-09-30 (late evening, assistant of hsnkshhsjss-code — a third-party
   user of this public repo, not the owner):** hsnkshhsjss-code cloned the repo
